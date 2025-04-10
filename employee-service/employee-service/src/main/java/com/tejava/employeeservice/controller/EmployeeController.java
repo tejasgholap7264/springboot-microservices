@@ -22,7 +22,7 @@ public class EmployeeController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<APIResponseDto> saveEmployee(@PathVariable("id") Long employeeId){
+    public ResponseEntity<APIResponseDto> getEmployeeById(@PathVariable("id") Long employeeId){
         APIResponseDto apiResponseDto = employeeService.getEmployeeById(employeeId);
         return new ResponseEntity<>(apiResponseDto, HttpStatus.OK);
     }

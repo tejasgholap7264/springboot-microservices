@@ -8,6 +8,7 @@ import com.tejava.employeeservice.exception.ResourceNotFoundException;
 import com.tejava.employeeservice.repository.EmployeeRepository;
 import com.tejava.employeeservice.service.APIClient;
 import com.tejava.employeeservice.service.EmployeeService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return modelMapper.map(employee,EmployeeDto.class);
     }
 
+    @CircuitBreaker(name = "${spring.application.name}",fallbackMethod = "getDefaultDepartment")
     @Override
     public APIResponseDto getEmployeeById(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
@@ -51,6 +53,22 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         EmployeeDto employeeDto= modelMapper.map(employee,EmployeeDto.class);
 
+        APIResponseDto apiResponseDto = new APIResponseDto();
+        apiResponseDto.setEmployeeDto(employeeDto);
+        apiResponseDto.setDepartmentDto(departmentDto);
+        return apiResponseDto;
+    }
+
+    public APIResponseDto getDefaultDepartment(Long employeeId,Exception exception){
+
+        Employee employee = employeeRepository.findById(employeeId).get();
+
+        DepartmentDto departmentDto = new DepartmentDto();
+        departmentDto.setDepartmentName("R&D Department");
+        departmentDto.setDepartmentCode("RD001");
+        departmentDto.setDepartmentDescription("Research & Development Department");
+
+        EmployeeDto employeeDto= modelMapper.map(employee,EmployeeDto.class);
         APIResponseDto apiResponseDto = new APIResponseDto();
         apiResponseDto.setEmployeeDto(employeeDto);
         apiResponseDto.setDepartmentDto(departmentDto);
